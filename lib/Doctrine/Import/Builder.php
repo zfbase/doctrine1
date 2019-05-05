@@ -676,7 +676,7 @@ class Doctrine_Import_Builder extends Doctrine_Builder
                 $name = trim($name);
                 $fieldName = trim($fieldName);
 
-                $ret[] = '@property ' . $column['type'] . ' $' . $fieldName;
+                $ret[] = '@property ' . $column['type'] . ' $' . $fieldName . (isset($column['comment']) ? ' ' . $column['comment']:'');
             }
 
             if (isset($definition['relations']) && ! empty($definition['relations'])) {
