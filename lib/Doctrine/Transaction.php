@@ -199,21 +199,21 @@ class Doctrine_Transaction extends Doctrine_Connection_Module
             }
 
             $listener->postSavepointCreate($event);
-        } else {
-            if ($this->_nestingLevel == 0) {
-                $event = new Doctrine_Event($this, Doctrine_Event::TX_BEGIN);
+        } elseif ($this->_nestingLevel == 0 && method_exists($this->conn->getDbh(), 'inTransaction') && $this->conn->getDbh()->inTransaction()) {
+            trigger_error('There is an active transaction while nestingLevel==0');
+        } elseif ($this->_nestingLevel == 0) {
+            $event = new Doctrine_Event($this, Doctrine_Event::TX_BEGIN);
 
-                $listener->preTransactionBegin($event);
+            $listener->preTransactionBegin($event);
 
-                if ( ! $event->skipOperation) {
-                    try {
-                        $this->_doBeginTransaction();
-                    } catch (Exception $e) {
-                        throw new Doctrine_Transaction_Exception($e->getMessage());
-                    }
+            if ( ! $event->skipOperation) {
+                try {
+                    $this->_doBeginTransaction();
+                } catch (Exception $e) {
+                    throw new Doctrine_Transaction_Exception($e->getMessage());
                 }
-                $listener->postTransactionBegin($event);
             }
+            $listener->postTransactionBegin($event);
         }
 
         $level = ++$this->_nestingLevel;
