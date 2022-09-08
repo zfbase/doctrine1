@@ -993,7 +993,7 @@ class Doctrine_Import_Builder extends Doctrine_Builder
         
         $docs = PHP_EOL . $this->buildPhpDocs($definition);
 
-        $content = sprintf(self::$_tpl, $docs, $abstract,
+        $content = sprintf(self::$_tpl ?? '', $docs, $abstract,
                                        $className,
                                        $extends,
                                        $tableDefinitionCode,
@@ -1113,7 +1113,7 @@ class Doctrine_Import_Builder extends Doctrine_Builder
         $docBlock = PHP_EOL.' * ' . implode(PHP_EOL . ' * ', $docBlock);
 
         $content  = '<?php' . PHP_EOL.PHP_EOL;
-        $content .= sprintf(self::$_tpl,
+        $content .= sprintf(self::$_tpl ?? '',
             $docBlock,
             false,
             $className,

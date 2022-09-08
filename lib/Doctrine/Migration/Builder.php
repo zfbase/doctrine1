@@ -532,7 +532,7 @@ END;
 
         $content  = '<?php' . PHP_EOL;
 
-        $content .= sprintf(self::$tpl, $className,
+        $content .= sprintf(self::$tpl ?? '', $className,
                                        $extends,
                                        $up,
                                        $down);

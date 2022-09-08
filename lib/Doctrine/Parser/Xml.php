@@ -53,7 +53,7 @@ class Doctrine_Parser_Xml extends Doctrine_Parser
     /**
      * arrayToXml
      *
-     * @param  string $array        Array to convert to xml    
+     * @param  array  $array        Array to convert to xml    
      * @param  string $rootNodeName Name of the root node
      * @param  string $xml          SimpleXmlElement
      * @return string $asXml        String of xml built from array
@@ -86,7 +86,7 @@ class Doctrine_Parser_Xml extends Doctrine_Parser
                 if (strcasecmp($charset, 'utf-8') !== 0 && strcasecmp($charset, 'utf8') !== 0) {
                     $value = iconv($charset, 'UTF-8', $value);
                 }
-                $value = htmlspecialchars($value, ENT_COMPAT, 'UTF-8');
+                $value = htmlspecialchars($value ?? '', ENT_COMPAT, 'UTF-8');
                 $xml->addChild($key, $value);
             }
         }

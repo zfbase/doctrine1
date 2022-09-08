@@ -1122,7 +1122,7 @@ class Doctrine_Table extends Doctrine_Configurable implements Countable
         }
 
         if ( ! is_array($orderBy)) {
-            $e1 = explode(',', $orderBy);
+            $e1 = explode(',', $orderBy ?? '');
         } else {
             $e1 = $orderBy;
         }
@@ -1158,7 +1158,7 @@ class Doctrine_Table extends Doctrine_Configurable implements Countable
     {
         // FIX ME: This is being used in places where an array is passed, but it should not be an array
         // For example in places where Doctrine should support composite foreign/primary keys
-        $fieldName = is_array($fieldName) ? $fieldName[0]:$fieldName;
+        $fieldName = is_array($fieldName) ? $fieldName[0] : $fieldName;
 
         if (isset($this->_columnNames[$fieldName])) {
             return $this->_columnNames[$fieldName];
