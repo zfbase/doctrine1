@@ -1149,7 +1149,9 @@ abstract class Doctrine_Query_Abstract
         $copy->free();
 
         if ($componentsBefore !== $componentsAfter) {
-            return array_diff_assoc($componentsAfter, $componentsBefore);
+            return array_udiff_assoc($componentsAfter, $componentsBefore, function ($a, $b) {
+                return strcmp(json_encode($a), json_encode($b));
+            });
         } else {
             return $componentsAfter;
         }
