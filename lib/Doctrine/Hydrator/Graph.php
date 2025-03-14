@@ -35,6 +35,7 @@
  */
 abstract class Doctrine_Hydrator_Graph extends Doctrine_Hydrator_Abstract
 {
+    protected $_rootAlias = null;
     protected $_tables = array();
 
     /**

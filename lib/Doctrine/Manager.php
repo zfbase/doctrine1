@@ -90,7 +90,7 @@ class Doctrine_Manager extends Doctrine_Configurable implements Countable, Itera
         'oracle'   => 'Doctrine_Connection_Oracle',
         'mssql'    => 'Doctrine_Connection_Mssql',
         'dblib'    => 'Doctrine_Connection_Mssql',
-        'odbc'     => 'Doctrine_Connection_Mssql', 
+        'odbc'     => 'Doctrine_Connection_Mssql',
         'mock'     => 'Doctrine_Connection_Mock'
     );
 
@@ -128,45 +128,45 @@ class Doctrine_Manager extends Doctrine_Configurable implements Countable, Itera
      */
     public function setDefaultAttributes()
     {
-        if ( ! $this->_initialized) {
+        if (! $this->_initialized) {
             $this->_initialized = true;
             $attributes = array(
-                        Doctrine_Core::ATTR_CACHE                        => null,
-                        Doctrine_Core::ATTR_RESULT_CACHE                 => null,
-                        Doctrine_Core::ATTR_QUERY_CACHE                  => null,
-                        Doctrine_Core::ATTR_LOAD_REFERENCES              => true,
-                        Doctrine_Core::ATTR_LISTENER                     => new Doctrine_EventListener(),
-                        Doctrine_Core::ATTR_RECORD_LISTENER              => new Doctrine_Record_Listener(),
-                        Doctrine_Core::ATTR_THROW_EXCEPTIONS             => true,
-                        Doctrine_Core::ATTR_VALIDATE                     => Doctrine_Core::VALIDATE_NONE,
-                        Doctrine_Core::ATTR_QUERY_LIMIT                  => Doctrine_Core::LIMIT_RECORDS,
-                        Doctrine_Core::ATTR_IDXNAME_FORMAT               => "%s_idx",
-                        Doctrine_Core::ATTR_SEQNAME_FORMAT               => "%s_seq",
-                        Doctrine_Core::ATTR_TBLNAME_FORMAT               => "%s",
-                        Doctrine_Core::ATTR_FKNAME_FORMAT                => "%s",
-                        Doctrine_Core::ATTR_QUOTE_IDENTIFIER             => false,
-                        Doctrine_Core::ATTR_SEQCOL_NAME                  => 'id',
-                        Doctrine_Core::ATTR_PORTABILITY                  => Doctrine_Core::PORTABILITY_NONE,
-                        Doctrine_Core::ATTR_EXPORT                       => Doctrine_Core::EXPORT_ALL,
-                        Doctrine_Core::ATTR_DECIMAL_PLACES               => 2,
-                        Doctrine_Core::ATTR_DEFAULT_PARAM_NAMESPACE      => 'doctrine',
-                        Doctrine_Core::ATTR_AUTOLOAD_TABLE_CLASSES       => false,
-                        Doctrine_Core::ATTR_USE_DQL_CALLBACKS            => false,
-                        Doctrine_Core::ATTR_AUTO_ACCESSOR_OVERRIDE       => false,
-                        Doctrine_Core::ATTR_AUTO_FREE_QUERY_OBJECTS      => false,
-                        Doctrine_Core::ATTR_DEFAULT_IDENTIFIER_OPTIONS   => array(),
-                        Doctrine_Core::ATTR_DEFAULT_COLUMN_OPTIONS       => array(),
-                        Doctrine_Core::ATTR_HYDRATE_OVERWRITE            => true,
-                        Doctrine_Core::ATTR_QUERY_CLASS                  => 'Doctrine_Query',
-                        Doctrine_Core::ATTR_COLLECTION_CLASS             => 'Doctrine_Collection',
-                        Doctrine_Core::ATTR_TABLE_CLASS                  => 'Doctrine_Table',
-                        Doctrine_Core::ATTR_CASCADE_SAVES                => true,
-                        Doctrine_Core::ATTR_TABLE_CLASS_FORMAT           => '%sTable'
-                        ); 
+                Doctrine_Core::ATTR_CACHE                        => null,
+                Doctrine_Core::ATTR_RESULT_CACHE                 => null,
+                Doctrine_Core::ATTR_QUERY_CACHE                  => null,
+                Doctrine_Core::ATTR_LOAD_REFERENCES              => true,
+                Doctrine_Core::ATTR_LISTENER                     => new Doctrine_EventListener(),
+                Doctrine_Core::ATTR_RECORD_LISTENER              => new Doctrine_Record_Listener(),
+                Doctrine_Core::ATTR_THROW_EXCEPTIONS             => true,
+                Doctrine_Core::ATTR_VALIDATE                     => Doctrine_Core::VALIDATE_NONE,
+                Doctrine_Core::ATTR_QUERY_LIMIT                  => Doctrine_Core::LIMIT_RECORDS,
+                Doctrine_Core::ATTR_IDXNAME_FORMAT               => "%s_idx",
+                Doctrine_Core::ATTR_SEQNAME_FORMAT               => "%s_seq",
+                Doctrine_Core::ATTR_TBLNAME_FORMAT               => "%s",
+                Doctrine_Core::ATTR_FKNAME_FORMAT                => "%s",
+                Doctrine_Core::ATTR_QUOTE_IDENTIFIER             => false,
+                Doctrine_Core::ATTR_SEQCOL_NAME                  => 'id',
+                Doctrine_Core::ATTR_PORTABILITY                  => Doctrine_Core::PORTABILITY_NONE,
+                Doctrine_Core::ATTR_EXPORT                       => Doctrine_Core::EXPORT_ALL,
+                Doctrine_Core::ATTR_DECIMAL_PLACES               => 2,
+                Doctrine_Core::ATTR_DEFAULT_PARAM_NAMESPACE      => 'doctrine',
+                Doctrine_Core::ATTR_AUTOLOAD_TABLE_CLASSES       => false,
+                Doctrine_Core::ATTR_USE_DQL_CALLBACKS            => false,
+                Doctrine_Core::ATTR_AUTO_ACCESSOR_OVERRIDE       => false,
+                Doctrine_Core::ATTR_AUTO_FREE_QUERY_OBJECTS      => false,
+                Doctrine_Core::ATTR_DEFAULT_IDENTIFIER_OPTIONS   => array(),
+                Doctrine_Core::ATTR_DEFAULT_COLUMN_OPTIONS       => array(),
+                Doctrine_Core::ATTR_HYDRATE_OVERWRITE            => true,
+                Doctrine_Core::ATTR_QUERY_CLASS                  => 'Doctrine_Query',
+                Doctrine_Core::ATTR_COLLECTION_CLASS             => 'Doctrine_Collection',
+                Doctrine_Core::ATTR_TABLE_CLASS                  => 'Doctrine_Table',
+                Doctrine_Core::ATTR_CASCADE_SAVES                => true,
+                Doctrine_Core::ATTR_TABLE_CLASS_FORMAT           => '%sTable'
+            );
             foreach ($attributes as $attribute => $value) {
                 $old = $this->getAttribute($attribute);
                 if ($old === null) {
-                    $this->setAttribute($attribute,$value);
+                    $this->setAttribute($attribute, $value);
                 }
             }
             return true;
@@ -182,7 +182,7 @@ class Doctrine_Manager extends Doctrine_Configurable implements Countable, Itera
      */
     public static function getInstance()
     {
-        if ( ! isset(self::$_instance)) {
+        if (! isset(self::$_instance)) {
             self::$_instance = new self();
         }
         return self::$_instance;
@@ -229,9 +229,9 @@ class Doctrine_Manager extends Doctrine_Configurable implements Countable, Itera
      */
     public function getQueryRegistry()
     {
-      	if ( ! isset($this->_queryRegistry)) {
-      	   $this->_queryRegistry = new Doctrine_Query_Registry();
-      	}
+        if (! isset($this->_queryRegistry)) {
+            $this->_queryRegistry = new Doctrine_Query_Registry();
+        }
         return $this->_queryRegistry;
     }
 
@@ -243,7 +243,7 @@ class Doctrine_Manager extends Doctrine_Configurable implements Countable, Itera
     public function setQueryRegistry(Doctrine_Query_Registry $registry)
     {
         $this->_queryRegistry = $registry;
-        
+
         return $this;
     }
 
@@ -280,13 +280,13 @@ class Doctrine_Manager extends Doctrine_Configurable implements Countable, Itera
     public function openConnection($adapter, $name = null, $setCurrent = true)
     {
         if (is_object($adapter)) {
-            if ( ! ($adapter instanceof PDO) && ! in_array('Doctrine_Adapter_Interface', class_implements($adapter))) {
+            if (! ($adapter instanceof PDO) && ! in_array('Doctrine_Adapter_Interface', class_implements($adapter))) {
                 throw new Doctrine_Manager_Exception("First argument should be an instance of PDO or implement Doctrine_Adapter_Interface");
             }
 
             $driverName = $adapter->getAttribute(Doctrine_Core::ATTR_DRIVER_NAME);
         } else if (is_array($adapter)) {
-            if ( ! isset($adapter[0])) {
+            if (! isset($adapter[0])) {
                 throw new Doctrine_Manager_Exception('Empty data source name given.');
             }
             $e = explode(':', $adapter[0]);
@@ -310,7 +310,7 @@ class Doctrine_Manager extends Doctrine_Configurable implements Countable, Itera
         // Decode adapter information
         if (is_array($adapter)) {
             foreach ($adapter as $key => $value) {
-                $adapter[$key]  = $value ? urldecode($value):null;
+                $adapter[$key]  = $value ? urldecode($value) : null;
             }
         }
 
@@ -330,7 +330,7 @@ class Doctrine_Manager extends Doctrine_Configurable implements Countable, Itera
             $this->_index++;
         }
 
-        if ( ! isset($this->_connectionDrivers[$driverName])) {
+        if (! isset($this->_connectionDrivers[$driverName])) {
             throw new Doctrine_Manager_Exception('Unknown driver ' . $driverName);
         }
 
@@ -345,7 +345,7 @@ class Doctrine_Manager extends Doctrine_Configurable implements Countable, Itera
         }
         return $this->_connections[$name];
     }
-    
+
     /**
      * Parse a pdo style dsn in to an array of parts
      *
@@ -360,7 +360,7 @@ class Doctrine_Manager extends Doctrine_Configurable implements Countable, Itera
         $names = array('dsn', 'scheme', 'host', 'port', 'user', 'pass', 'path', 'query', 'fragment', 'unix_socket');
 
         foreach ($names as $name) {
-            if ( ! isset($parts[$name])) {
+            if (! isset($parts[$name])) {
                 $parts[$name] = null;
             }
         }
@@ -375,8 +375,7 @@ class Doctrine_Manager extends Doctrine_Configurable implements Countable, Itera
                 $e2 = explode('=', $string);
 
                 if (isset($e2[0]) && isset($e2[1])) {
-                    if (count($e2) > 2)
-                    {
+                    if (count($e2) > 2) {
                         $key = $e2[0];
                         unset($e2[0]);
                         $value = implode('=', $e2);
@@ -411,7 +410,7 @@ class Doctrine_Manager extends Doctrine_Configurable implements Countable, Itera
         $names = array('dsn', 'scheme', 'host', 'port', 'user', 'pass', 'path', 'query', 'fragment');
 
         foreach ($names as $name) {
-            if ( ! isset($parts[$name])) {
+            if (! isset($parts[$name])) {
                 $parts[$name] = null;
             }
         }
@@ -455,19 +454,19 @@ class Doctrine_Manager extends Doctrine_Configurable implements Countable, Itera
 
             case 'mssql':
             case 'dblib':
-                if ( ! isset($parts['path']) || $parts['path'] == '/') {
+                if (! isset($parts['path']) || $parts['path'] == '/') {
                     throw new Doctrine_Manager_Exception('No database available in data source name');
                 }
                 if (isset($parts['path'])) {
                     $parts['database'] = substr($parts['path'], 1);
                 }
-                if ( ! isset($parts['host'])) {
+                if (! isset($parts['host'])) {
                     throw new Doctrine_Manager_Exception('No hostname set in data source name');
                 }
 
                 $parts['dsn'] = $parts['scheme'] . ':host='
-                              . $parts['host'] . (isset($parts['port']) ? ':' . $parts['port']:null) . ';dbname='
-                              . $parts['database'];
+                    . $parts['host'] . (isset($parts['port']) ? ':' . $parts['port'] : null) . ';dbname='
+                    . $parts['database'];
 
                 break;
 
@@ -478,19 +477,19 @@ class Doctrine_Manager extends Doctrine_Configurable implements Countable, Itera
             case 'odbc':
             case 'mock':
             case 'oracle':
-                if ( ! isset($parts['path']) || $parts['path'] == '/') {
+                if (! isset($parts['path']) || $parts['path'] == '/') {
                     throw new Doctrine_Manager_Exception('No database available in data source name');
                 }
                 if (isset($parts['path'])) {
                     $parts['database'] = substr($parts['path'], 1);
                 }
-                if ( ! isset($parts['host'])) {
+                if (! isset($parts['host'])) {
                     throw new Doctrine_Manager_Exception('No hostname set in data source name');
                 }
 
                 $parts['dsn'] = $parts['scheme'] . ':host='
-                              . $parts['host'] . (isset($parts['port']) ? ';port=' . $parts['port']:null) . ';dbname='
-                              . $parts['database'];
+                    . $parts['host'] . (isset($parts['port']) ? ';port=' . $parts['port'] : null) . ';dbname='
+                    . $parts['database'];
 
                 break;
             default:
@@ -509,7 +508,7 @@ class Doctrine_Manager extends Doctrine_Configurable implements Countable, Itera
      */
     public function getConnection($name)
     {
-        if ( ! isset($this->_connections[$name])) {
+        if (! isset($this->_connections[$name])) {
             throw new Doctrine_Manager_Exception('Unknown connection: ' . $name);
         }
 
@@ -613,7 +612,7 @@ class Doctrine_Manager extends Doctrine_Configurable implements Countable, Itera
     public function setCurrentConnection($key)
     {
         $key = (string) $key;
-        if ( ! isset($this->_connections[$key])) {
+        if (! isset($this->_connections[$key])) {
             throw new Doctrine_Manager_Exception("Connection key '$key' does not exist.");
         }
         $this->_currIndex = $key;
@@ -635,7 +634,7 @@ class Doctrine_Manager extends Doctrine_Configurable implements Countable, Itera
      *
      * @return integer
      */
-    public function count()
+    public function count(): int
     {
         return count($this->_connections);
     }
@@ -645,7 +644,7 @@ class Doctrine_Manager extends Doctrine_Configurable implements Countable, Itera
      *
      * @return ArrayIterator
      */
-    public function getIterator()
+    public function getIterator(): Traversable
     {
         return new ArrayIterator($this->_connections);
     }
@@ -659,7 +658,7 @@ class Doctrine_Manager extends Doctrine_Configurable implements Countable, Itera
     public function getCurrentConnection()
     {
         $i = $this->_currIndex;
-        if ( ! isset($this->_connections[$i])) {
+        if (! isset($this->_connections[$i])) {
             throw new Doctrine_Connection_Exception('There is no open connection');
         }
         return $this->_connections[$i];
@@ -674,12 +673,12 @@ class Doctrine_Manager extends Doctrine_Configurable implements Countable, Itera
      */
     public function createDatabases($specifiedConnections = array())
     {
-        if ( ! is_array($specifiedConnections)) {
+        if (! is_array($specifiedConnections)) {
             $specifiedConnections = (array) $specifiedConnections;
         }
 
         foreach ($this as $name => $connection) {
-            if ( ! empty($specifiedConnections) && ! in_array($name, $specifiedConnections)) {
+            if (! empty($specifiedConnections) && ! in_array($name, $specifiedConnections)) {
                 continue;
             }
 
@@ -696,12 +695,12 @@ class Doctrine_Manager extends Doctrine_Configurable implements Countable, Itera
      */
     public function dropDatabases($specifiedConnections = array())
     {
-        if ( ! is_array($specifiedConnections)) {
+        if (! is_array($specifiedConnections)) {
             $specifiedConnections = (array) $specifiedConnections;
         }
 
         foreach ($this as $name => $connection) {
-            if ( ! empty($specifiedConnections) && ! in_array($name, $specifiedConnections)) {
+            if (! empty($specifiedConnections) && ! in_array($name, $specifiedConnections)) {
                 continue;
             }
 
@@ -718,9 +717,9 @@ class Doctrine_Manager extends Doctrine_Configurable implements Countable, Itera
     {
         $r[] = "<pre>";
         $r[] = "Doctrine_Manager";
-        $r[] = "Connections : ".count($this->_connections);
+        $r[] = "Connections : " . count($this->_connections);
         $r[] = "</pre>";
-        return implode("\n",$r);
+        return implode("\n", $r);
     }
 
     /**
@@ -730,7 +729,7 @@ class Doctrine_Manager extends Doctrine_Configurable implements Countable, Itera
      */
     public function getValidators()
     {
-        if ( ! $this->_loadedValidatorsFromDisk) {
+        if (! $this->_loadedValidatorsFromDisk) {
             $this->_loadedValidatorsFromDisk = true;
 
             $validators = array();
@@ -764,7 +763,7 @@ class Doctrine_Manager extends Doctrine_Configurable implements Countable, Itera
     {
         $validators = (array) $validators;
         foreach ($validators as $validator) {
-            if ( ! in_array($validator, $this->_validators)) {
+            if (! in_array($validator, $this->_validators)) {
                 $this->_validators[] = $validator;
             }
         }

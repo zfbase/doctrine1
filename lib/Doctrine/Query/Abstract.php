@@ -102,11 +102,13 @@ abstract class Doctrine_Query_Abstract
     /**
      * @var array $_params  The parameters of this query.
      */
-    protected $_params = array('exec' => array(),
-                               'join' => array(),
-                               'where' => array(),
-                               'set' => array(),
-                               'having' => array());
+    protected $_params = array(
+        'exec' => array(),
+        'join' => array(),
+        'where' => array(),
+        'set' => array(),
+        'having' => array()
+    );
 
     /**
      * @var array $_execParams The parameters passed to connection statement
@@ -153,36 +155,36 @@ abstract class Doctrine_Query_Abstract
      * @var array $_sqlParts  The SQL query string parts. Filled during the DQL parsing process.
      */
     protected $_sqlParts = array(
-            'select'    => array(),
-            'distinct'  => false,
-            'forUpdate' => false,
-            'from'      => array(),
-            'set'       => array(),
-            'join'      => array(),
-            'where'     => array(),
-            'groupby'   => array(),
-            'having'    => array(),
-            'orderby'   => array(),
-            'limit'     => false,
-            'offset'    => false,
-            );
+        'select'    => array(),
+        'distinct'  => false,
+        'forUpdate' => false,
+        'from'      => array(),
+        'set'       => array(),
+        'join'      => array(),
+        'where'     => array(),
+        'groupby'   => array(),
+        'having'    => array(),
+        'orderby'   => array(),
+        'limit'     => false,
+        'offset'    => false,
+    );
 
     /**
      * @var array $_dqlParts    an array containing all DQL query parts; @see Doctrine_Query::getDqlPart()
      */
     protected $_dqlParts = array(
-                            'from'      => array(),
-                            'select'    => array(),
-                            'forUpdate' => false,
-                            'set'       => array(),
-                            'join'      => array(),
-                            'where'     => array(),
-                            'groupby'   => array(),
-                            'having'    => array(),
-                            'orderby'   => array(),
-                            'limit'     => array(),
-                            'offset'    => array(),
-                            );
+        'from'      => array(),
+        'select'    => array(),
+        'forUpdate' => false,
+        'set'       => array(),
+        'join'      => array(),
+        'where'     => array(),
+        'groupby'   => array(),
+        'having'    => array(),
+        'orderby'   => array(),
+        'limit'     => array(),
+        'offset'    => array(),
+    );
 
 
     /**
@@ -205,13 +207,13 @@ abstract class Doctrine_Query_Abstract
      */
     protected $_queryComponents = array();
 
-	/**
+    /**
      * Stores the root DQL alias
      *
      * @var string
      */
     protected $_rootAlias = '';
-	
+
     /**
      * @var integer $type                   the query type
      *
@@ -276,9 +278,10 @@ abstract class Doctrine_Query_Abstract
      * @param Doctrine_Connection  The connection object the query will use.
      * @param Doctrine_Hydrator_Abstract  The hydrator that will be used for generating result sets.
      */
-    public function __construct(Doctrine_Connection $connection = null,
-            Doctrine_Hydrator_Abstract $hydrator = null)
-    {
+    public function __construct(
+        ?Doctrine_Connection $connection = null,
+        ?Doctrine_Hydrator_Abstract $hydrator = null
+    ) {
         if ($connection === null) {
             $connection = Doctrine_Manager::getInstance()->getCurrentConnection();
         } else {
@@ -315,7 +318,7 @@ abstract class Doctrine_Query_Abstract
      */
     public function setOption($name, $value)
     {
-        if ( ! isset($this->_options[$name])) {
+        if (! isset($this->_options[$name])) {
             throw new Doctrine_Query_Exception('Unknown option ' . $name);
         }
         $this->_options[$name] = $value;
@@ -356,22 +359,22 @@ abstract class Doctrine_Query_Abstract
     {
         $q = '';
         if ($this->_type == self::SELECT) {
-            $q .= ( ! empty($this->_dqlParts['select'])) ? 'SELECT ' . implode(', ', $this->_dqlParts['select']) : '';
-            $q .= ( ! empty($this->_dqlParts['from'])) ? ' FROM ' . implode(' ', $this->_dqlParts['from']) : '';
+            $q .= (! empty($this->_dqlParts['select'])) ? 'SELECT ' . implode(', ', $this->_dqlParts['select']) : '';
+            $q .= (! empty($this->_dqlParts['from'])) ? ' FROM ' . implode(' ', $this->_dqlParts['from']) : '';
         } else if ($this->_type == self::DELETE) {
             $q .= 'DELETE';
-            $q .= ( ! empty($this->_dqlParts['from'])) ? ' FROM ' . implode(' ', $this->_dqlParts['from']) : '';
+            $q .= (! empty($this->_dqlParts['from'])) ? ' FROM ' . implode(' ', $this->_dqlParts['from']) : '';
         } else if ($this->_type == self::UPDATE) {
             $q .= 'UPDATE ';
-            $q .= ( ! empty($this->_dqlParts['from'])) ? implode(' ', $this->_dqlParts['from']) : '';
-            $q .= ( ! empty($this->_dqlParts['set'])) ? ' SET ' . implode(' ', $this->_dqlParts['set']) : '';
+            $q .= (! empty($this->_dqlParts['from'])) ? implode(' ', $this->_dqlParts['from']) : '';
+            $q .= (! empty($this->_dqlParts['set'])) ? ' SET ' . implode(' ', $this->_dqlParts['set']) : '';
         }
-        $q .= ( ! empty($this->_dqlParts['where'])) ? ' WHERE ' . implode(' ', $this->_dqlParts['where']) : '';
-        $q .= ( ! empty($this->_dqlParts['groupby'])) ? ' GROUP BY ' . implode(', ', $this->_dqlParts['groupby']) : '';
-        $q .= ( ! empty($this->_dqlParts['having'])) ? ' HAVING ' . implode(' AND ', $this->_dqlParts['having']) : '';
-        $q .= ( ! empty($this->_dqlParts['orderby'])) ? ' ORDER BY ' . implode(', ', $this->_dqlParts['orderby']) : '';
-        $q .= ( ! empty($this->_dqlParts['limit'])) ? ' LIMIT ' . implode(' ', $this->_dqlParts['limit']) : '';
-        $q .= ( ! empty($this->_dqlParts['offset'])) ? ' OFFSET ' . implode(' ', $this->_dqlParts['offset']) : '';
+        $q .= (! empty($this->_dqlParts['where'])) ? ' WHERE ' . implode(' ', $this->_dqlParts['where']) : '';
+        $q .= (! empty($this->_dqlParts['groupby'])) ? ' GROUP BY ' . implode(', ', $this->_dqlParts['groupby']) : '';
+        $q .= (! empty($this->_dqlParts['having'])) ? ' HAVING ' . implode(' AND ', $this->_dqlParts['having']) : '';
+        $q .= (! empty($this->_dqlParts['orderby'])) ? ' ORDER BY ' . implode(', ', $this->_dqlParts['orderby']) : '';
+        $q .= (! empty($this->_dqlParts['limit'])) ? ' LIMIT ' . implode(' ', $this->_dqlParts['limit']) : '';
+        $q .= (! empty($this->_dqlParts['offset'])) ? ' OFFSET ' . implode(' ', $this->_dqlParts['offset']) : '';
 
         return $q;
     }
@@ -387,7 +390,7 @@ abstract class Doctrine_Query_Abstract
      */
     public function getSqlQueryPart($part)
     {
-        if ( ! isset($this->_sqlParts[$part])) {
+        if (! isset($this->_sqlParts[$part])) {
             throw new Doctrine_Query_Exception('Unknown SQL query part ' . $part);
         }
         return $this->_sqlParts[$part];
@@ -404,7 +407,7 @@ abstract class Doctrine_Query_Abstract
      */
     public function setSqlQueryPart($name, $part)
     {
-        if ( ! isset($this->_sqlParts[$name])) {
+        if (! isset($this->_sqlParts[$name])) {
             throw new Doctrine_Query_Exception('Unknown query part ' . $name);
         }
 
@@ -432,7 +435,7 @@ abstract class Doctrine_Query_Abstract
      */
     public function addSqlQueryPart($name, $part)
     {
-        if ( ! isset($this->_sqlParts[$name])) {
+        if (! isset($this->_sqlParts[$name])) {
             throw new Doctrine_Query_Exception('Unknown query part ' . $name);
         }
         if (is_array($part)) {
@@ -453,7 +456,7 @@ abstract class Doctrine_Query_Abstract
      */
     public function removeSqlQueryPart($name)
     {
-        if ( ! isset($this->_sqlParts[$name])) {
+        if (! isset($this->_sqlParts[$name])) {
             throw new Doctrine_Query_Exception('Unknown query part ' . $name);
         }
 
@@ -476,7 +479,7 @@ abstract class Doctrine_Query_Abstract
      */
     public function removeDqlQueryPart($name)
     {
-        if ( ! isset($this->_dqlParts[$name])) {
+        if (! isset($this->_dqlParts[$name])) {
             throw new Doctrine_Query_Exception('Unknown query part ' . $name);
         }
 
@@ -509,9 +512,12 @@ abstract class Doctrine_Query_Abstract
     public function getFlattenedParams($params = array())
     {
         return array_merge(
-            (array) $params, (array) $this->_params['exec'], 
-            $this->_params['join'], $this->_params['set'],
-            $this->_params['where'], $this->_params['having']
+            (array) $params,
+            (array) $this->_params['exec'],
+            $this->_params['join'],
+            $this->_params['set'],
+            $this->_params['where'],
+            $this->_params['having']
         );
     }
 
@@ -534,7 +540,7 @@ abstract class Doctrine_Query_Abstract
     {
         $this->_params = $params;
     }
-    
+
     /**
      * getCountQueryParams
      * Retrieves the parameters for count query
@@ -543,7 +549,7 @@ abstract class Doctrine_Query_Abstract
      */
     public function getCountQueryParams($params = array())
     {
-        if ( ! is_array($params)) {
+        if (! is_array($params)) {
             $params = array($params);
         }
 
@@ -562,19 +568,19 @@ abstract class Doctrine_Query_Abstract
     public function fixArrayParameterValues($params = array())
     {
         $i = 0;
-	
+
         foreach ($params as $param) {
             if (is_array($param)) {
                 $c = count($param);
 
                 array_splice($params, $i, 1, $param);
-                
+
                 $i += $c;
             } else {
                 $i++;
             }
         }
-        
+
         $this->_execParams = $params;
     }
 
@@ -628,7 +634,7 @@ abstract class Doctrine_Query_Abstract
 
         // No inheritance map so lets just return
         if (empty($map)) {
-          return;
+            return;
         }
 
         $tableAlias = $this->getSqlTableAlias($componentAlias);
@@ -641,15 +647,15 @@ abstract class Doctrine_Query_Abstract
 
         // Fix for 2015: loop through whole inheritanceMap to add all   
         // keyFields for inheritance (and not only the first) 
-        $retVal = ""; 
-        $count = 0; 
-         
-        foreach ($map as $field => $value) { 
+        $retVal = "";
+        $count = 0;
+
+        foreach ($map as $field => $value) {
             if ($count++ > 0) {
                 $retVal .= ' AND ';
             }
 
-            $identifier = $this->_conn->quoteIdentifier($tableAlias . $field); 
+            $identifier = $this->_conn->quoteIdentifier($tableAlias . $field);
             $retVal .= $identifier . ' = ' . $this->_conn->quote($value);
         }
 
@@ -698,7 +704,7 @@ abstract class Doctrine_Query_Abstract
             $i    = ((int) substr($oldAlias, 1));
 
             // Fix #1530: It was reaching unexistent seeds index
-            if ( ! isset($this->_tableAliasSeeds[$name])) {
+            if (! isset($this->_tableAliasSeeds[$name])) {
                 $this->_tableAliasSeeds[$name] = 1;
             }
 
@@ -719,7 +725,7 @@ abstract class Doctrine_Query_Abstract
      */
     public function getSqlTableAliasSeed($sqlTableAlias)
     {
-        if ( ! isset($this->_tableAliasSeeds[$sqlTableAlias])) {
+        if (! isset($this->_tableAliasSeeds[$sqlTableAlias])) {
             return 0;
         }
         return $this->_tableAliasSeeds[$sqlTableAlias];
@@ -746,7 +752,7 @@ abstract class Doctrine_Query_Abstract
      */
     public function getQueryComponent($componentAlias)
     {
-        if ( ! isset($this->_queryComponents[$componentAlias])) {
+        if (! isset($this->_queryComponents[$componentAlias])) {
             throw new Doctrine_Query_Exception('Unknown component alias ' . $componentAlias);
         }
 
@@ -766,9 +772,9 @@ abstract class Doctrine_Query_Abstract
      */
     public function copySubqueryInfo(Doctrine_Query_Abstract $query)
     {
-        $this->_params =& $query->_params;
-        $this->_tableAliasMap =& $query->_tableAliasMap;
-        $this->_queryComponents =& $query->_queryComponents;
+        $this->_params = &$query->_params;
+        $this->_tableAliasMap = &$query->_tableAliasMap;
+        $this->_queryComponents = &$query->_queryComponents;
         $this->_tableAliasSeeds = $query->_tableAliasSeeds;
         return $this;
     }
@@ -781,10 +787,10 @@ abstract class Doctrine_Query_Abstract
      */
     public function getRootAlias()
     {
-        if ( ! $this->_queryComponents) {
+        if (! $this->_queryComponents) {
             $this->getSqlQuery(array(), false);
         }
-        
+
         return $this->_rootAlias;
     }
 
@@ -810,7 +816,7 @@ abstract class Doctrine_Query_Abstract
     {
         $map = $this->_queryComponents[$this->_rootAlias];
 
-        if ( ! isset($map['table'])) {
+        if (! isset($map['table'])) {
             throw new Doctrine_Query_Exception('Root component not initialized.');
         }
 
@@ -833,12 +839,12 @@ abstract class Doctrine_Query_Abstract
 
         $alias = $char;
 
-        if ( ! isset($this->_tableAliasSeeds[$alias])) {
+        if (! isset($this->_tableAliasSeeds[$alias])) {
             $this->_tableAliasSeeds[$alias] = 1;
         }
 
         while (isset($this->_tableAliasMap[$alias])) {
-            if ( ! isset($this->_tableAliasSeeds[$alias])) {
+            if (! isset($this->_tableAliasSeeds[$alias])) {
                 $this->_tableAliasSeeds[$alias] = 1;
             }
             $alias = $char . ++$this->_tableAliasSeeds[$alias];
@@ -859,7 +865,7 @@ abstract class Doctrine_Query_Abstract
     public function getComponentAlias($sqlTableAlias)
     {
         $sqlTableAlias = trim($sqlTableAlias, '[]`"');
-        if ( ! isset($this->_tableAliasMap[$sqlTableAlias])) {
+        if (! isset($this->_tableAliasMap[$sqlTableAlias])) {
             throw new Doctrine_Query_Exception('Unknown table alias ' . $sqlTableAlias);
         }
         return $this->_tableAliasMap[$sqlTableAlias];
@@ -903,11 +909,11 @@ abstract class Doctrine_Query_Abstract
      */
     public function getResultCacheHash($params = array())
     {
-      if ($this->_resultCacheHash) {
-          return $this->_resultCacheHash;
-      } else {
-          return $this->calculateResultCacheHash($params);
-      }
+        if ($this->_resultCacheHash) {
+            return $this->_resultCacheHash;
+        } else {
+            return $this->calculateResultCacheHash($params);
+        }
     }
 
     /**
@@ -928,7 +934,7 @@ abstract class Doctrine_Query_Abstract
         $dqlParams = $this->getFlattenedParams($params);
 
         // Check if we're not using a Doctrine_View
-        if ( ! $this->_view) {
+        if (! $this->_view) {
             if ($this->_queryCache !== false && ($this->_queryCache || $this->_conn->getAttribute(Doctrine_Core::ATTR_QUERY_CACHE))) {
                 $queryCacheDriver = $this->getQueryCacheDriver();
                 $hash = $this->calculateQueryCacheHash();
@@ -938,13 +944,13 @@ abstract class Doctrine_Query_Abstract
                 if ($cached) {
                     // Rebuild query from cache
                     $query = $this->_constructQueryFromCache($cached);
-                    
+
                     // Assign building/execution specific params
                     $this->_params['exec'] = $params;
-            
+
                     // Initialize prepared parameters array
                     $this->_execParams = $this->getFlattenedParams();
-                    
+
                     // Fix possible array parameter values in SQL params
                     $this->fixArrayParameterValues($this->getInternalParams());
                 } else {
@@ -967,12 +973,14 @@ abstract class Doctrine_Query_Abstract
         } else {
             $query = $this->_view->getSelectSql();
         }
-        
+
         // Get prepared SQL params for execution
         $params = $this->getInternalParams();
 
-        if ($this->isLimitSubqueryUsed() &&
-                $this->_conn->getAttribute(Doctrine_Core::ATTR_DRIVER_NAME) !== 'mysql') {
+        if (
+            $this->isLimitSubqueryUsed() &&
+            $this->_conn->getAttribute(Doctrine_Core::ATTR_DRIVER_NAME) !== 'mysql'
+        ) {
             $params = array_merge((array) $params, (array) $params);
         }
 
@@ -1038,7 +1046,7 @@ abstract class Doctrine_Query_Abstract
                 $this->_hydrator->setQueryComponents($this->_queryComponents);
                 if ($this->_type == self::SELECT && $hydrationMode == Doctrine_Core::HYDRATE_ON_DEMAND) {
                     $hydrationDriver = $this->_hydrator->getHydratorDriver($hydrationMode, $this->_tableAliasMap);
-                    $result = new Doctrine_Collection_OnDemand($stmt, $hydrationDriver, $this->_tableAliasMap); 
+                    $result = new Doctrine_Collection_OnDemand($stmt, $hydrationDriver, $this->_tableAliasMap);
                 } else {
                     $result = $this->_hydrator->hydrateResultSet($stmt, $this->_tableAliasMap);
                 }
@@ -1054,9 +1062,7 @@ abstract class Doctrine_Query_Abstract
     /**
      * Blank template method free(). Override to be used to free query object memory
      */
-    public function free()
-    { 
-    }
+    public function free() {}
 
     /**
      * Get the dql call back for this query
@@ -1066,26 +1072,26 @@ abstract class Doctrine_Query_Abstract
     protected function _getDqlCallback()
     {
         $callback = false;
-        if ( ! empty($this->_dqlParts['from'])) {
+        if (! empty($this->_dqlParts['from'])) {
             switch ($this->_type) {
                 case self::DELETE:
                     $callback = array(
                         'callback' => 'preDqlDelete',
                         'const' => Doctrine_Event::RECORD_DQL_DELETE
                     );
-                break;
+                    break;
                 case self::UPDATE:
                     $callback = array(
                         'callback' => 'preDqlUpdate',
                         'const' => Doctrine_Event::RECORD_DQL_UPDATE
                     );
-                break;
+                    break;
                 case self::SELECT:
                     $callback = array(
                         'callback' => 'preDqlSelect',
                         'const' => Doctrine_Event::RECORD_DQL_SELECT
                     );
-                break;
+                    break;
             }
         }
 
@@ -1100,13 +1106,13 @@ abstract class Doctrine_Query_Abstract
      */
     protected function _preQuery($params = array())
     {
-        if ( ! $this->_preQueried && $this->getConnection()->getAttribute(Doctrine_Core::ATTR_USE_DQL_CALLBACKS)) {
+        if (! $this->_preQueried && $this->getConnection()->getAttribute(Doctrine_Core::ATTR_USE_DQL_CALLBACKS)) {
             $this->_preQueried = true;
 
             $callback = $this->_getDqlCallback();
 
             // if there is no callback for the query type, then we can return early
-            if ( ! $callback) {
+            if (! $callback) {
                 return;
             }
 
@@ -1162,9 +1168,7 @@ abstract class Doctrine_Query_Abstract
      *
      * @return void
      */
-    public function preQuery()
-    {
-    }
+    public function preQuery() {}
 
     /**
      * Constructs the query from the cached form.
@@ -1185,9 +1189,9 @@ abstract class Doctrine_Query_Abstract
         foreach ($cachedComponents as $alias => $components) {
             $e = explode('.', $components['name']);
             if (count($e) === 1) {
-                $manager = Doctrine_Manager::getInstance(); 
-                if ( ! $this->_passedConn && $manager->hasConnectionForComponent($e[0])) { 
-                    $this->_conn = $manager->getConnectionForComponent($e[0]); 
+                $manager = Doctrine_Manager::getInstance();
+                if (! $this->_passedConn && $manager->hasConnectionForComponent($e[0])) {
+                    $this->_conn = $manager->getConnectionForComponent($e[0]);
                 }
                 $queryComponents[$alias]['table'] = $this->_conn->getTable($e[0]);
             } else {
@@ -1219,7 +1223,7 @@ abstract class Doctrine_Query_Abstract
         $componentInfo = array();
 
         foreach ($this->getQueryComponents() as $alias => $components) {
-            if ( ! isset($components['parent'])) {
+            if (! isset($components['parent'])) {
                 $componentInfo[$alias]['name'] = $components['table']->getComponentName();
             } else {
                 $componentInfo[$alias]['name'] = $components['parent'] . '.' . $components['relation']->getAlias();
@@ -1780,19 +1784,19 @@ abstract class Doctrine_Query_Abstract
     protected function clear()
     {
         $this->_sqlParts = array(
-                    'select'    => array(),
-                    'distinct'  => false,
-                    'forUpdate' => false,
-                    'from'      => array(),
-                    'set'       => array(),
-                    'join'      => array(),
-                    'where'     => array(),
-                    'groupby'   => array(),
-                    'having'    => array(),
-                    'orderby'   => array(),
-                    'limit'     => false,
-                    'offset'    => false,
-                    );
+            'select'    => array(),
+            'distinct'  => false,
+            'forUpdate' => false,
+            'from'      => array(),
+            'set'       => array(),
+            'join'      => array(),
+            'where'     => array(),
+            'groupby'   => array(),
+            'having'    => array(),
+            'orderby'   => array(),
+            'limit'     => false,
+            'offset'    => false,
+        );
     }
 
     public function setHydrationMode($hydrationMode)
@@ -1848,7 +1852,7 @@ abstract class Doctrine_Query_Abstract
      */
     public function useResultCache($driver = true, $timeToLive = null, $resultCacheHash = null)
     {
-        if ($driver !== null && $driver !== true && ! ($driver instanceOf Doctrine_Cache_Interface)) {
+        if ($driver !== null && $driver !== true && ! ($driver instanceof Doctrine_Cache_Interface)) {
             $msg = 'First argument should be instance of Doctrine_Cache_Interface or null.';
             throw new Doctrine_Query_Exception($msg);
         }
@@ -1896,7 +1900,7 @@ abstract class Doctrine_Query_Abstract
      */
     public function useQueryCache($driver = true, $timeToLive = null)
     {
-        if ($driver !== null && $driver !== true && $driver !== false && ! ($driver instanceOf Doctrine_Cache_Interface)) {
+        if ($driver !== null && $driver !== true && $driver !== false && ! ($driver instanceof Doctrine_Cache_Interface)) {
             $msg = 'First argument should be instance of Doctrine_Cache_Interface or null.';
             throw new Doctrine_Query_Exception($msg);
         }
@@ -2105,12 +2109,12 @@ abstract class Doctrine_Query_Abstract
      */
     protected function _getParser($name)
     {
-        if ( ! isset($this->_parsers[$name])) {
+        if (! isset($this->_parsers[$name])) {
             $class = 'Doctrine_Query_' . ucwords(strtolower($name));
 
             Doctrine_Core::autoload($class);
 
-            if ( ! class_exists($class)) {
+            if (! class_exists($class)) {
                 throw new Doctrine_Query_Exception('Unknown parser ' . $name);
             }
 
