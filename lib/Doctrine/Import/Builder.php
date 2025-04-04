@@ -703,7 +703,7 @@ class Doctrine_Import_Builder extends Doctrine_Builder
                 $name = trim($name);
                 $fieldName = trim($fieldName);
 
-                $ret[] = '@property ' . $this->replacePhpdocType($column['type']) . ' $' . $fieldName . (isset($column['comment']) ? ' ' . $column['comment'] : '');
+                $ret[] = '@property ' . ($column['notnull'] ? '' : '?') . $this->replacePhpdocType($column['type']) . ' $' . $fieldName . (isset($column['comment']) ? ' ' . $column['comment'] : '');
             }
 
             if (isset($definition['relations']) && ! empty($definition['relations'])) {
