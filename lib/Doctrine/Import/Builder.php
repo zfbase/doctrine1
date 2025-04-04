@@ -635,6 +635,20 @@ class Doctrine_Import_Builder extends Doctrine_Builder
         return $ret;
     }
 
+    private function replacePhpdocType($type)
+    {
+        switch ($type) {
+            case 'date':
+            case 'decimal':
+            case 'enum':
+            case 'time':
+            case 'timestamp':
+                return 'string';
+            default:
+                return $type;
+        }
+    }
+
     /*
      * Build the phpDoc for a class definition
      *
@@ -689,7 +703,7 @@ class Doctrine_Import_Builder extends Doctrine_Builder
                 $name = trim($name);
                 $fieldName = trim($fieldName);
 
-                $ret[] = '@property ' . $column['type'] . ' $' . $fieldName . (isset($column['comment']) ? ' ' . $column['comment']:'');
+                $ret[] = '@property ' . $this->replacePhpdocType($column['type']) . ' $' . $fieldName . (isset($column['comment']) ? ' ' . $column['comment'] : '');
             }
 
             if (isset($definition['relations']) && ! empty($definition['relations'])) {
