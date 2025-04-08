@@ -644,6 +644,8 @@ class Doctrine_Import_Builder extends Doctrine_Builder
             case 'time':
             case 'timestamp':
                 return 'string';
+            case 'integer':
+                return 'int';
             default:
                 return $type;
         }
