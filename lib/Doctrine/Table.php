@@ -2341,7 +2341,7 @@ class Doctrine_Table extends Doctrine_Configurable implements Countable
             switch ($type) {
                 case 'enum':
                 case 'integer':
-                case 'string';
+                case 'string':
                     // don't do any casting here PHP INT_MAX is smaller than what the databases support
                     break;
                 case 'set':
