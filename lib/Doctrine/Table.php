@@ -178,6 +178,7 @@ class Doctrine_Table extends Doctrine_Configurable implements Countable
         'joinedParents'  => array(),
         'queryParts'     => array(),
         'versioning'     => null,
+        'optimisticLocking' => null,
         'subclasses'     => array(),
         'orderBy'        => null
     );

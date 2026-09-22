@@ -665,10 +665,21 @@ abstract class Doctrine_Connection extends Doctrine_Configurable implements Coun
 
         $params = array_merge(array_values($fields), array_values($identifier));
 
+        // the where clause is built from the keys of $identifier, exactly as
+        // Doctrine_Connection::delete() does, so that callers can narrow the
+        // update with conditions beyond the primary key
+        // $checkOption is passed explicitly so that the clause stays identical
+        // to what quoteMultipleIdentifier() produced here before: the mssql
+        // driver flips that argument's default and would otherwise start
+        // quoting identifiers this statement has never quoted
+        $where = array();
+        foreach (array_keys($identifier) as $fieldName) {
+            $where[] = $this->quoteIdentifier($table->getColumnName($fieldName), true) . ' = ?';
+        }
+
         $sql  = 'UPDATE ' . $this->quoteIdentifier($table->getTableName())
             . ' SET ' . implode(', ', $set)
-            . ' WHERE ' . implode(' = ? AND ', $this->quoteMultipleIdentifier($table->getIdentifierColumnNames()))
-            . ' = ?';
+            . ' WHERE ' . implode(' AND ', $where);
 
         return $this->exec($sql, $params);
     }

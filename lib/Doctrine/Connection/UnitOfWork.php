@@ -525,13 +525,19 @@ class Doctrine_Connection_UnitOfWork extends Doctrine_Connection_Module
             $table = $record->getTable();
             if ( ! $event->skipOperation) {
                 $identifier = $record->identifier();
+                $lockField = $this->_prepareOptimisticLock($record, $identifier);
+
                 if ($table->getOption('joinedParents')) {
                     // currrently just for bc!
-                    $this->_updateCTIRecord($table, $record);
+                    $this->_updateCTIRecord($table, $record, $identifier, $lockField);
                     //--
                 } else {
                     $array = $record->getPrepared();
-                    $this->conn->update($table, $array, $identifier);
+                    $rows = $this->conn->update($table, $array, $identifier);
+
+                    if ($lockField !== null && ! $rows) {
+                        $this->_throwStaleRecord($record, $lockField, $identifier[$lockField]);
+                    }
                 }
                 $record->assignIdentifier(true);
             }
@@ -563,6 +569,8 @@ class Doctrine_Connection_UnitOfWork extends Doctrine_Connection_Module
             $table = $record->getTable();
 
             if ( ! $event->skipOperation) {
+                $this->_initOptimisticLock($record);
+
                 if ($table->getOption('joinedParents')) {
                     // just for bc!
                     $this->_insertCTIRecord($table, $record);
@@ -841,9 +849,153 @@ class Doctrine_Connection_UnitOfWork extends Doctrine_Connection_Module
      * Class Table Inheritance code.
      * Support dropped for 0.10/1.0.
      */
-    private function _updateCTIRecord(Doctrine_Table $table, Doctrine_Record $record)
+    /**
+     * Resolves the version field configured through the 'optimisticLocking'
+     * table option.
+     *
+     * @param  Doctrine_Table $table
+     * @return string|null    the version field name, or null when not enabled
+     * @throws Doctrine_Locking_Exception   if the configured field does not exist
+     */
+    protected function _getOptimisticLockField(Doctrine_Table $table)
     {
-        $identifier = $record->identifier();
+        $option = $table->getOption('optimisticLocking');
+
+        if ($option === null) {
+            // class table inheritance: table options are not inherited, so the
+            // ancestors are consulted once and the answer cached on the table
+            $option = false;
+
+            // joinedParents only ever names components that have a table of
+            // their own; 'parents' would also list abstract base classes
+            foreach ((array) $table->getOption('joinedParents') as $parent) {
+                $inherited = $this->conn->getTable($parent)->getOption('optimisticLocking');
+
+                if ( ! empty($inherited)) {
+                    $option = $inherited;
+                    break;
+                }
+            }
+
+            $table->setOption('optimisticLocking', $option);
+        }
+
+        if (empty($option)) {
+            return null;
+        }
+
+        $fieldName = ($option === true) ? 'version' : $option;
+
+        if ( ! $table->hasField($fieldName)) {
+            throw new Doctrine_Locking_Exception(
+                'Optimistic locking is enabled on "' . $table->getComponentName()
+                . '" but it has no "' . $fieldName . '" field.'
+            );
+        }
+
+        return $fieldName;
+    }
+
+    /**
+     * Names the component whose table physically carries the version column.
+     *
+     * With class table inheritance the column lives on a single table, and only
+     * that table's update may carry the version condition.
+     *
+     * @param  Doctrine_Table $table
+     * @param  string         $fieldName
+     * @return string         the owning component name
+     */
+    protected function _getOptimisticLockOwner(Doctrine_Table $table, $fieldName)
+    {
+        $definition = $table->getColumnDefinition($table->getColumnName($fieldName));
+
+        return isset($definition['owner']) ? $definition['owner'] : $table->getComponentName();
+    }
+
+    /**
+     * Gives a record its initial version before it is inserted.
+     *
+     * A listener such as Doctrine_Template_Versionable may already have set
+     * one, in which case it is left alone.
+     *
+     * @param  Doctrine_Record $record
+     * @return void
+     */
+    protected function _initOptimisticLock(Doctrine_Record $record)
+    {
+        $fieldName = $this->_getOptimisticLockField($record->getTable());
+
+        if ($fieldName !== null && $record->get($fieldName, false) === null) {
+            $record->set($fieldName, 1);
+        }
+    }
+
+    /**
+     * Prepares the optimistic locking condition for an update.
+     *
+     * The version the record was loaded with is added to $identifier so that it
+     * becomes part of the UPDATE's where clause, and the record's version is
+     * incremented so the new value is written by the same statement.
+     *
+     * @param  Doctrine_Record $record
+     * @param  array           $identifier  the update condition, modified in place
+     * @return string|null     the version field name, or null when no check applies
+     * @throws Doctrine_Locking_Exception   if the configured field does not exist
+     */
+    protected function _prepareOptimisticLock(Doctrine_Record $record, array &$identifier)
+    {
+        $fieldName = $this->_getOptimisticLockField($record->getTable());
+
+        if ($fieldName === null) {
+            return null;
+        }
+
+        $oldValues = $record->getModified(true);
+
+        if (array_key_exists($fieldName, $oldValues)) {
+            // a listener or the application already assigned a new version, so
+            // the value it replaced is the one to match on
+            $expected = $oldValues[$fieldName];
+        } else {
+            $expected = $record->get($fieldName, false);
+            // a row written before the column existed carries no version: seed
+            // it instead, so that every later save is guarded
+            $record->set($fieldName, ($expected === null) ? 1 : $expected + 1);
+        }
+
+        if ($expected === null) {
+            return null;
+        }
+
+        $identifier[$fieldName] = $expected;
+
+        return $fieldName;
+    }
+
+    /**
+     * Reports an update that matched no row because the version moved on.
+     *
+     * @param  Doctrine_Record $record
+     * @param  string          $fieldName
+     * @param  mixed           $expected
+     * @return void
+     * @throws Doctrine_Locking_Exception
+     */
+    protected function _throwStaleRecord(Doctrine_Record $record, $fieldName, $expected)
+    {
+        throw new Doctrine_Locking_Exception(
+            'Record "' . $record->getTable()->getComponentName() . '" was changed or removed by '
+            . 'another process: no row matched ' . $fieldName . ' = ' . $expected
+            . '. Reload the record and apply the changes again.'
+        );
+    }
+
+    private function _updateCTIRecord(Doctrine_Table $table, Doctrine_Record $record, ?array $identifier = null, $lockField = null)
+    {
+        if ($identifier === null) {
+            $identifier = $record->identifier();
+        }
         $dataSet = $this->_formatDataSet($record);
 
         $component = $table->getComponentName();
@@ -867,7 +1019,24 @@ class Doctrine_Connection_UnitOfWork extends Doctrine_Connection_Module
                 continue;
             }
 
-            $this->conn->update($this->conn->getTable($class), $dataSet[$class], $identifier);
+            // the version column lives on one table only, so the condition and
+            // the row check apply to that table alone
+            $classIdentifier = $identifier;
+            $checkRows = false;
+
+            if ($lockField !== null) {
+                if ($class === $this->_getOptimisticLockOwner($table, $lockField)) {
+                    $checkRows = true;
+                } else {
+                    unset($classIdentifier[$lockField]);
+                }
+            }
+
+            $rows = $this->conn->update($parentTable, $dataSet[$class], $classIdentifier);
+
+            if ($checkRows && ! $rows) {
+                $this->_throwStaleRecord($record, $lockField, $identifier[$lockField]);
+            }
         }
     }
 

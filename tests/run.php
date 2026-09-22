@@ -302,6 +302,7 @@ $unsorted->addTestCase(new Doctrine_RawSql_TestCase());
 $unsorted->addTestCase(new Doctrine_NewCore_TestCase());
 $unsorted->addTestCase(new Doctrine_Template_TestCase());
 $unsorted->addTestCase(new Doctrine_PessimisticLocking_TestCase());
+$unsorted->addTestCase(new Doctrine_OptimisticLocking_TestCase());
 $test->addTestCase($unsorted);
 
 $nestedSet = new GroupTest('Nested set tests', 'nestedset');
