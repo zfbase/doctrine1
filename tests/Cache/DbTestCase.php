@@ -33,6 +33,8 @@
  */
 class Doctrine_Cache_Db_TestCase extends Doctrine_Cache_Abstract_TestCase
 {
+    protected $cache;
+
     public function setUp()
     {
         parent::setUp();

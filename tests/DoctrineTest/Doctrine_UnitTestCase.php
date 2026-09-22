@@ -32,6 +32,11 @@
  */
 class Doctrine_UnitTestCase extends UnitTestCase 
 {
+    protected $query;
+    protected $exc;
+    protected $import;
+    protected $sequence;
+
     protected $manager;
     protected $connection;
     protected $objTable;
@@ -62,6 +67,23 @@ class Doctrine_UnitTestCase extends UnitTestCase
         return $this->_name;
     }
 
+    /**
+     * PDO::connect() (PHP 8.4+) yields the driver specific subclasses that carry
+     * the replacements for the deprecated PDO::sqlite*() methods.
+     */
+    public static function newPdo()
+    {
+        $args = func_get_args();
+
+        if (method_exists('PDO', 'connect')) {
+            return call_user_func_array(array('PDO', 'connect'), $args);
+        }
+
+        $class = new ReflectionClass('PDO');
+
+        return $class->newInstanceArgs($args);
+    }
+
     public function init() 
     {
         $this->_name = get_class($this);
@@ -78,7 +100,7 @@ class Doctrine_UnitTestCase extends UnitTestCase
                               'album',
                               'song',
                               'element',
-                              'error',
+                              'errorRecord',
                               'description',
                               'address',
                               'account',
@@ -135,8 +157,12 @@ class Doctrine_UnitTestCase extends UnitTestCase
 
         } catch(Doctrine_Manager_Exception $e) {
             if ($this->driverName == 'main') {
-                $this->dbh = new PDO('sqlite::memory:');
-                $this->dbh->sqliteCreateFunction('trim', 'trim', 1);
+                $this->dbh = self::newPdo('sqlite::memory:');
+                if (method_exists($this->dbh, 'createFunction')) {
+                    $this->dbh->createFunction('trim', 'trim', 1);
+                } else {
+                    $this->dbh->sqliteCreateFunction('trim', 'trim', 1);
+                }
             } else {
                 $this->dbh = $this->adapter = new Doctrine_Adapter_Mock($this->driverName);
             }

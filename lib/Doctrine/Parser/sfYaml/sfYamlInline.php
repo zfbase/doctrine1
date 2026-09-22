@@ -98,7 +98,7 @@ class sfYamlInline
         return 'true';
       case false === $value:
         return 'false';
-      case ctype_digit($value):
+      case is_string($value) && ctype_digit($value):
         return is_string($value) ? "'$value'" : (int) $value;
       case is_numeric($value):
         return is_infinite($value) ? str_ireplace('INF', '.Inf', strval($value)) : (is_string($value) ? "'$value'" : $value);
@@ -135,7 +135,7 @@ class sfYamlInline
     if (
       (1 == count($keys) && '0' == $keys[0])
       ||
-      (count($keys) > 1 && array_reduce($keys, create_function('$v,$w', 'return (integer) $v + $w;'), 0) == count($keys) * (count($keys) - 1) / 2))
+      (count($keys) > 1 && array_reduce($keys, function ($v, $w) { return (int) $v + $w; }, 0) == count($keys) * (count($keys) - 1) / 2))
     {
       $output = array();
       foreach ($value as $val)

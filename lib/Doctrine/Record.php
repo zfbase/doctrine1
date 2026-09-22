@@ -780,9 +780,9 @@ abstract class Doctrine_Record extends Doctrine_Record_Abstract implements Count
      * serialize
      * this method is automatically called when an instance of Doctrine_Record is serialized
      *
-     * @return string
+     * @return array
      */
-    public function __serialize()
+    public function __serialize(): array
     {
         $event = new Doctrine_Event($this, Doctrine_Event::RECORD_SERIALIZE);
 
@@ -825,22 +825,20 @@ abstract class Doctrine_Record extends Doctrine_Record_Abstract implements Count
             }
         }
 
-        $str = serialize($vars);
-
         $this->postSerialize($event);
         $this->getTable()->getRecordListener()->postSerialize($event);
 
-        return $str;
+        return $vars;
     }
 
     /**
      * this method is automatically called everytime an instance is unserialized
      *
-     * @param string $serialized                Doctrine_Record as serialized string
+     * @param array $data                       Doctrine_Record as an array of object vars
      * @throws Doctrine_Record_Exception        if the cleanData operation fails somehow
      * @return void
      */
-    public function __unserialize($serialized)
+    public function __unserialize(array $data): void
     {
         $event = new Doctrine_Event($this, Doctrine_Event::RECORD_UNSERIALIZE);
 
@@ -852,9 +850,7 @@ abstract class Doctrine_Record extends Doctrine_Record_Abstract implements Count
         $this->preUnserialize($event);
         $this->getTable()->getRecordListener()->preUnserialize($event);
 
-        $array = unserialize($serialized);
-
-        foreach ($array as $k => $v) {
+        foreach ($data as $k => $v) {
             $this->$k = $v;
         }
 

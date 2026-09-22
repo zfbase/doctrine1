@@ -74,7 +74,7 @@ abstract class Doctrine_Collection_Iterator implements Iterator
      *
      * @return void
      */
-    public function rewind()
+    public function rewind(): void
     {
         $this->index = 0;
         $i = $this->index;
@@ -88,7 +88,7 @@ abstract class Doctrine_Collection_Iterator implements Iterator
      *
      * @return integer
      */
-    public function key()
+    public function key(): mixed
     {
         return $this->key;
     }
@@ -98,7 +98,7 @@ abstract class Doctrine_Collection_Iterator implements Iterator
      *
      * @return Doctrine_Record
      */
-    public function current()
+    public function current(): mixed
     {
         return $this->collection->get($this->key);
     }
@@ -108,7 +108,7 @@ abstract class Doctrine_Collection_Iterator implements Iterator
      *
      * @return void
      */
-    public function next()
+    public function next(): void
     {
         $this->index++;
         $i = $this->index;

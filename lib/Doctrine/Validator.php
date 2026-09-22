@@ -130,7 +130,8 @@ class Doctrine_Validator extends Doctrine_Locator_Injectable
         if (function_exists('mb_strlen')) {
             return mb_strlen($string ?? '', 'utf8');
         } else {
-            return strlen(utf8_decode($string ?? ''));
+            // no mbstring: count utf8 characters by skipping continuation bytes
+            return strlen(preg_replace('/[\x80-\xBF]/', '', $string ?? ''));
         }
     }
 
@@ -165,9 +166,9 @@ class Doctrine_Validator extends Doctrine_Locator_Injectable
              case 'float':
              case 'double':
              case 'decimal':
-                 return (string) $var == strval(floatval($var));
+                 return ! is_array($var) && (string) $var == strval(floatval($var));
              case 'integer':
-                 return (string) $var == strval(round(floatval($var)));
+                 return ! is_array($var) && (string) $var == strval(round(floatval($var)));
              case 'string':
                  return is_string($var) || is_numeric($var);
              case 'blob':

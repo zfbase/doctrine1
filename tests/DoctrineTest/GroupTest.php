@@ -5,6 +5,7 @@ class GroupTest extends UnitTestCase
     protected $_name;
     protected $_title;
     protected $_onlyRunFailed = false;
+    protected $_formatter;
 
     public function __construct($title, $name)
     {
@@ -50,7 +51,7 @@ class GroupTest extends UnitTestCase
         }
         return true;
     }
-    public function run(DoctrineTest_Reporter $reporter = null, $filter = null)
+    public function run(?DoctrineTest_Reporter $reporter = null, $filter = null)
     {
         set_time_limit(900);
 

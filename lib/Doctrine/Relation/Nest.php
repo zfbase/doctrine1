@@ -46,13 +46,8 @@ class Doctrine_Relation_Nest extends Doctrine_Relation_Association
             $tableName  = $record->getTable()->getTableName();
             
             // Removing schema name from table names (MySQL Nest Relations fix)
-            function removeSchemaFromTable($tableName) {
-                $e = explode('.', $tableName);
-                if (isset($e[1])) return $e[1];
-                return $e[0];
-            }
-    	    $assocTable = removeSchemaFromTable($assocTable);
-            $tableName = removeSchemaFromTable($tableName);
+            $assocTable = $this->_removeSchemaFromTable($assocTable);
+            $tableName = $this->_removeSchemaFromTable($tableName);
             
             $identifierColumnNames = $record->getTable()->getIdentifierColumnNames();
             $identifier = $formatter->quoteIdentifier(array_pop($identifierColumnNames));
@@ -96,5 +91,23 @@ class Doctrine_Relation_Nest extends Doctrine_Relation_Association
 
             return $res;
         }
+    }
+
+    /**
+     * _removeSchemaFromTable
+     * strips the schema prefix from a table name (MySQL Nest Relations fix)
+     *
+     * @param string $tableName
+     * @return string
+     */
+    protected function _removeSchemaFromTable($tableName)
+    {
+        $e = explode('.', $tableName);
+
+        if (isset($e[1])) {
+            return $e[1];
+        }
+
+        return $e[0];
     }
 }

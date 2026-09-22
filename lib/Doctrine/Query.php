@@ -1425,25 +1425,26 @@ class Doctrine_Query extends Doctrine_Query_Abstract implements Countable
             foreach ($this->_sqlParts['orderby'] as $part) {
                 // Remove identifier quoting if it exists
                 $e = $this->_tokenizer->bracketExplode($part, ' ');
+                $callback = function ($e) { return trim($e, '[]`"'); };
+
+                // every token is considered: sort directions and aggregate
+                // aliases are filtered out by the checks below
                 foreach ($e as $f) {
-                    if ($f == 0 || $f % 2 == 0) {
-                        $partOriginal = str_replace(',', '', trim($f));
-                        $callback = create_function('$e', 'return trim($e, \'[]`"\');');
-                        $part = trim(implode('.', array_map($callback, explode('.', $partOriginal))));
+                    $partOriginal = str_replace(',', '', trim($f));
+                    $part = trim(implode('.', array_map($callback, explode('.', $partOriginal))));
 
-                        if (strpos($part, '.') === false) {
-                            continue;
-                        }
+                    if (strpos($part, '.') === false) {
+                        continue;
+                    }
 
-                        // don't add functions
-                        if (strpos($part, '(') !== false) {
-                            continue;
-                        }
+                    // don't add functions
+                    if (strpos($part, '(') !== false) {
+                        continue;
+                    }
 
-                        // don't add primarykey column (its already in the select clause)
-                        if ($part !== $primaryKey) {
-                            $subquery .= ', ' . $partOriginal;
-                        }
+                    // don't add primarykey column (its already in the select clause)
+                    if ($part !== $primaryKey) {
+                        $subquery .= ', ' . $partOriginal;
                     }
                 }
             }

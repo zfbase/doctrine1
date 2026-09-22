@@ -67,6 +67,11 @@ abstract class Doctrine_Connection extends Doctrine_Configurable implements Coun
     protected $tables           = array();
 
     /**
+     * @var array $exported                 an array of exported table names, reset by evictTables()
+     */
+    public $exported            = array();
+
+    /**
      * $_name
      *
      * Name of the connection
@@ -470,12 +475,21 @@ abstract class Doctrine_Connection extends Doctrine_Configurable implements Coun
         if (extension_loaded('pdo')) {
             if (in_array($e[0], self::getAvailableDrivers())) {
                 try {
-                    $this->dbh = new PDO(
+                    // PDO::connect() (PHP 8.4+) returns the driver specific
+                    // subclass, e.g. Pdo\Sqlite, which carries the replacements
+                    // for the deprecated PDO::sqlite*() methods
+                    $args = array(
                         $this->options['dsn'],
                         $this->options['username'],
                         (!$this->options['password'] ? '' : $this->options['password']),
                         $this->options['other']
                     );
+
+                    if (method_exists('PDO', 'connect')) {
+                        $this->dbh = PDO::connect($args[0], $args[1], $args[2], $args[3]);
+                    } else {
+                        $this->dbh = new PDO($args[0], $args[1], $args[2], $args[3]);
+                    }
 
                     $this->dbh->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
                 } catch (PDOException $e) {
@@ -1572,27 +1586,25 @@ abstract class Doctrine_Connection extends Doctrine_Configurable implements Coun
     /**
      * Serialize. Remove database connection(pdo) since it cannot be serialized
      *
-     * @return string $serialized
+     * @return array $serialized
      */
-    public function __serialize()
+    public function __serialize(): array
     {
         $vars = get_object_vars($this);
         $vars['dbh'] = null;
         $vars['isConnected'] = false;
-        return serialize($vars);
+        return $vars;
     }
 
     /**
      * Unserialize. Recreate connection from serialized content
      *
-     * @param string $serialized
+     * @param array $data
      * @return void
      */
-    public function __unserialize($serialized)
+    public function __unserialize(array $data): void
     {
-        $array = unserialize($serialized);
-
-        foreach ($array as $name => $values) {
+        foreach ($data as $name => $values) {
             $this->$name = $values;
         }
     }

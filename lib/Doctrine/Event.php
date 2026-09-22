@@ -136,10 +136,12 @@ class Doctrine_Event
         $this->_query    = $query;
         $this->_params   = $params;
         
-        // for ZFE
-        $config = Zend_Registry::get('config');
-        if ($config->doctrine->backtrace) {
-            $this->_backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+        // for ZFE (optional: Doctrine is also used outside of a ZF application)
+        if (class_exists('Zend_Registry') && Zend_Registry::isRegistered('config')) {
+            $config = Zend_Registry::get('config');
+            if (isset($config->doctrine->backtrace) && $config->doctrine->backtrace) {
+                $this->_backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+            }
         }
     }
     

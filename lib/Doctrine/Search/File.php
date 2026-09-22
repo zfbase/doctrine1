@@ -73,6 +73,11 @@ class Doctrine_Search_File extends Doctrine_Search
                                                 RecursiveIteratorIterator::LEAVES_ONLY);
                                                 
         foreach ($it as $file) {
+            // empty directories are leaves too, and cannot be read
+            if ( ! $file->isFile()) {
+                continue;
+            }
+
             if (strpos($file, DIRECTORY_SEPARATOR . '.svn') !== false) {
                 continue;
             }

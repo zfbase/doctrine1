@@ -68,10 +68,7 @@ class Doctrine_Connection_Sqlite extends Doctrine_Connection_Common
          parent::__construct($manager, $adapter);
 
         if ($this->isConnected) {
-            $this->dbh->sqliteCreateFunction('mod',    array('Doctrine_Expression_Sqlite', 'modImpl'), 2);
-            $this->dbh->sqliteCreateFunction('concat', array('Doctrine_Expression_Sqlite', 'concatImpl'));
-            $this->dbh->sqliteCreateFunction('md5', 'md5', 1);
-            $this->dbh->sqliteCreateFunction('now', array('Doctrine_Expression_Sqlite', 'nowImpl'), 0);
+            $this->_registerFunctions();
         }
     }
 
@@ -89,10 +86,40 @@ class Doctrine_Connection_Sqlite extends Doctrine_Connection_Common
 
         parent::connect();
 
-        $this->dbh->sqliteCreateFunction('mod',    array('Doctrine_Expression_Sqlite', 'modImpl'), 2);
-        $this->dbh->sqliteCreateFunction('concat', array('Doctrine_Expression_Sqlite', 'concatImpl'));
-        $this->dbh->sqliteCreateFunction('md5', 'md5', 1);
-        $this->dbh->sqliteCreateFunction('now', array('Doctrine_Expression_Sqlite', 'nowImpl'), 0);
+        $this->_registerFunctions();
+    }
+
+    /**
+     * _registerFunctions
+     * registers the sqlite functions Doctrine relies on
+     *
+     * PDO::sqliteCreateFunction() is deprecated as of PHP 8.5 in favour of
+     * Pdo\Sqlite::createFunction(), which only exists on handles created
+     * through PDO::connect(). Adapters such as Doctrine_Adapter_Mock still
+     * provide the old method only, hence the runtime check.
+     *
+     * @return void
+     */
+    protected function _registerFunctions()
+    {
+        $functions = array(
+            array('mod',    array('Doctrine_Expression_Sqlite', 'modImpl'), 2),
+            array('concat', array('Doctrine_Expression_Sqlite', 'concatImpl'), -1),
+            array('md5',    'md5', 1),
+            array('now',    array('Doctrine_Expression_Sqlite', 'nowImpl'), 0),
+        );
+
+        $useCreateFunction = method_exists($this->dbh, 'createFunction');
+
+        foreach ($functions as $function) {
+            list($name, $callback, $numArgs) = $function;
+
+            if ($useCreateFunction) {
+                $this->dbh->createFunction($name, $callback, $numArgs);
+            } else {
+                $this->dbh->sqliteCreateFunction($name, $callback, $numArgs);
+            }
+        }
     }
 
     /**

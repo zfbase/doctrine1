@@ -140,7 +140,7 @@ class Doctrine_Connection_Mssql extends Doctrine_Connection_Common
      * @link http://lists.bestpractical.com/pipermail/rt-devel/2005-June/007339.html
      * @return string
      */
-    public function modifyLimitQuery($query, $limit = false, $offset = false, $isManip = false, $isSubQuery = false, Doctrine_Query $queryOrigin = null)
+    public function modifyLimitQuery($query, $limit = false, $offset = false, $isManip = false, $isSubQuery = false, ?Doctrine_Query $queryOrigin = null)
     {
         if ($limit === false || !($limit > 0)) {
             return $query; 
@@ -260,8 +260,12 @@ class Doctrine_Connection_Mssql extends Doctrine_Connection_Common
         
         $tokens = preg_split('/,/', $parsed);
         
+        $callback = function ($matches) use ($chunks) {
+            return isset($chunks[$matches[1]]) ? $chunks[$matches[1]] : $matches[0];
+        };
+
         for ($i = 0, $iMax = count($tokens); $i < $iMax; $i++) {
-            $tokens[$i] = trim(preg_replace('/##(\d+)##/e', "\$chunks[\\1]", $tokens[$i]));
+            $tokens[$i] = trim(preg_replace_callback('/##(\d+)##/', $callback, $tokens[$i]));
         }
 
         return $tokens;
@@ -405,8 +409,12 @@ class Doctrine_Connection_Mssql extends Doctrine_Connection_Common
             $query = preg_replace($re, "\\1##{$key}##", $query, 1);
         }
         
-        $replacement = 'is_null($value) ? \'NULL\' : $this->quote($params[\\1])';
-        $query = preg_replace('/##(\d+)##/e', $replacement, $query);
+        $conn = $this;
+        $query = preg_replace_callback('/##(\d+)##/', function ($matches) use ($conn, $params) {
+            $value = isset($params[$matches[1]]) ? $params[$matches[1]] : null;
+
+            return is_null($value) ? 'NULL' : $conn->quote($value);
+        }, $query);
 
         return $query;
 

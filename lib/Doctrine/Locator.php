@@ -56,7 +56,7 @@ class Doctrine_Locator implements Countable, IteratorAggregate
      * @param array
      * @return void
      */
-    public function __construct(array $defaults = null)
+    public function __construct(?array $defaults = null)
     {
         if (null !== $defaults) {
             foreach ($defaults as $name => $resource) {
@@ -177,7 +177,7 @@ class Doctrine_Locator implements Countable, IteratorAggregate
      * @see Countable interface
      * @return integer              the number of resources
      */
-    public function count()
+    public function count(): int
     {
         return count($this->_resources);
     }
@@ -190,7 +190,7 @@ class Doctrine_Locator implements Countable, IteratorAggregate
      * @return ArrayIterator    an iterator for iterating through 
      *                          all bound resources
      */
-    public function getIterator()
+    public function getIterator(): Traversable
     {
         return new ArrayIterator($this->_resources);
     }

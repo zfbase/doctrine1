@@ -406,7 +406,7 @@ class Doctrine_Transaction extends Doctrine_Connection_Module
      */
     protected function _doRollback()
     {
-        if ($this->conn->getDbh()->inTransaction()) {
+        if ($this->_dbhInTransaction()) {
             $this->conn->getDbh()->rollback();
         }
     }
@@ -416,9 +416,30 @@ class Doctrine_Transaction extends Doctrine_Connection_Module
      */
     protected function _doCommit()
     {
-        if ($this->conn->getDbh()->inTransaction()) {
+        if ($this->_dbhInTransaction()) {
             $this->conn->getDbh()->commit();
         }
+    }
+
+    /**
+     * _dbhInTransaction
+     * whether the underlying handle reports an active transaction
+     *
+     * inTransaction() is part of PDO but not of Doctrine_Adapter_Interface, so
+     * adapters that do not implement it are assumed to be in a transaction -
+     * that is the behaviour of the drivers before the check was introduced.
+     *
+     * @return boolean
+     */
+    protected function _dbhInTransaction()
+    {
+        $dbh = $this->conn->getDbh();
+
+        if ( ! method_exists($dbh, 'inTransaction')) {
+            return true;
+        }
+
+        return $dbh->inTransaction();
     }
     
     /**

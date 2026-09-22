@@ -147,7 +147,7 @@ class Doctrine_Collection extends Doctrine_Access implements Countable, Iterator
      *
      * @return array
      */
-    public function __serialize()
+    public function __serialize(): array
     {
         $vars = get_object_vars($this);
 
@@ -160,7 +160,7 @@ class Doctrine_Collection extends Doctrine_Access implements Countable, Iterator
 
         $vars['_table'] = $vars['_table']->getComponentName();
 
-        return serialize($vars);
+        return $vars;
     }
 
     /**
@@ -168,12 +168,12 @@ class Doctrine_Collection extends Doctrine_Access implements Countable, Iterator
      *
      * @return void
      */
-    public function __unserialize($serialized)
+    public function __unserialize(array $data): void
     {
         $manager    = Doctrine_Manager::getInstance();
         $connection    = $manager->getCurrentConnection();
 
-        $array = unserialize($serialized);
+        $array = $data;
 
         foreach ($array as $name => $values) {
             $this->$name = $values;
@@ -309,7 +309,7 @@ class Doctrine_Collection extends Doctrine_Access implements Countable, Iterator
      * @param mixed $key
      * @return boolean
      */
-    public function remove($key): mixed
+    public function remove($key)
     {
         $removed = $this->data[$key];
 
@@ -357,7 +357,7 @@ class Doctrine_Collection extends Doctrine_Access implements Countable, Iterator
      */
     public function get($key)
     {
-        if (! isset($this->data[$key])) {
+        if (! isset($this->data[$key ?? ''])) {
             $record = $this->_table->create();
 
             if (isset($this->referenceField)) {

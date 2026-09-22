@@ -151,7 +151,7 @@ abstract class Doctrine_Access extends Doctrine_Locator_Injectable implements Ar
      * @param mixed $offset The offset to remove
      * @return boolean True if removed otherwise false
      */
-    public function remove($offset): mixed
+    public function remove($offset)
     {
         throw new Doctrine_Exception('Remove is not supported for ' . get_class($this));
     }

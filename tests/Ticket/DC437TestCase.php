@@ -36,11 +36,11 @@ class Doctrine_Ticket_DC437_TestCase extends Doctrine_UnitTestCase
     {
     	// Establish two new individual connections
         $dsn = 'sqlite::memory:';
-        $dbh = new PDO($dsn);
+        $dbh = Doctrine_UnitTestCase::newPdo($dsn);
         $this->manager->openConnection($dbh, 'conn1', false);
 
         $dsn = 'sqlite::memory:';
-        $dbh = new PDO($dsn);
+        $dbh = Doctrine_UnitTestCase::newPdo($dsn);
         $this->manager->openConnection($dbh, 'conn2', false);
     }
 

@@ -88,6 +88,13 @@ class Doctrine_Import_Builder extends Doctrine_Builder
     protected $_generateTableClasses = false;
 
     /**
+     * Bool true/false for whether or not to generate accessors
+     *
+     * @var boolean $generateAccessors
+     */
+    protected $_generateAccessors = false;
+
+    /**
      * Prefix to use for generated base classes
      *
      * @var string
@@ -705,7 +712,7 @@ class Doctrine_Import_Builder extends Doctrine_Builder
                 $name = trim($name);
                 $fieldName = trim($fieldName);
 
-                $ret[] = '@property ' . ($column['notnull'] ? '' : '?') . $this->replacePhpdocType($column['type']) . ' $' . $fieldName . (isset($column['comment']) ? ' ' . $column['comment'] : '');
+                $ret[] = '@property ' . (isset($column['notnull']) && $column['notnull'] ? '' : '?') . $this->replacePhpdocType($column['type']) . ' $' . $fieldName . (isset($column['comment']) ? ' ' . $column['comment'] : '');
             }
 
             if (isset($definition['relations']) && ! empty($definition['relations'])) {

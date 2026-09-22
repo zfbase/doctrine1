@@ -407,6 +407,10 @@ class Doctrine_Manager extends Doctrine_Configurable implements Countable, Itera
         // silence any warnings
         $parts = @parse_url($dsn);
 
+        if ($parts === false) {
+            $parts = array();
+        }
+
         $names = array('dsn', 'scheme', 'host', 'port', 'user', 'pass', 'path', 'query', 'fragment');
 
         foreach ($names as $name) {

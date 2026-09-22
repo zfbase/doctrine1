@@ -44,12 +44,22 @@ class Doctrine_RawSql extends Doctrine_Query_Abstract
     private $fields = array();
 
     /**
+     * @var boolean $_preQuery              whether the pre query process is done
+     */
+    protected $_preQuery = false;
+
+    /**
+     * @var array $_pendingJoinConditions   an array containing pending joins
+     */
+    protected $_pendingJoinConditions = array();
+
+    /**
      * Constructor.
      *
      * @param Doctrine_Connection  The connection object the query will use.
      * @param Doctrine_Hydrator_Abstract  The hydrator that will be used for generating result sets.
      */
-    function __construct(Doctrine_Connection $connection = null, Doctrine_Hydrator_Abstract $hydrator = null) {
+    function __construct(?Doctrine_Connection $connection = null, ?Doctrine_Hydrator_Abstract $hydrator = null) {
         parent::__construct($connection, $hydrator);
 
         // Fix #1472. It's alid to disable QueryCache since there's no DQL for RawSql.
@@ -161,7 +171,7 @@ class Doctrine_RawSql extends Doctrine_Query_Abstract
                     }
                     break;
                 case 'by':
-                    continue;
+                    continue 2;
                 default:
                     //not a keyword so we add it to the previous type.
                     if ( ! isset($parts[$type][0])) {
