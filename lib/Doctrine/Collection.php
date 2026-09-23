@@ -718,7 +718,7 @@ class Doctrine_Collection extends Doctrine_Access implements Countable, Iterator
     {
         $result = array();
         foreach ($this as $record) {
-            $result[$record->$key] = $record->$value;
+            $result[$record->$key ?? ''] = $record->$value;
         }
         return $result;
     }
