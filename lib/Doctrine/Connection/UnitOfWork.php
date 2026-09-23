@@ -140,6 +140,8 @@ class Doctrine_Connection_UnitOfWork extends Doctrine_Connection_Module
 
                     // save the MANY-TO-MANY associations
                     $this->saveAssociations($record);
+
+                    $this->saveSyncedLinks($record);
                 }
             }
 
@@ -463,6 +465,109 @@ class Doctrine_Connection_UnitOfWork extends Doctrine_Connection_Module
                 // take snapshot of collection state, so that we know when its modified again
                 $v->takeSnapshot();
             }
+        }
+    }
+
+    /**
+     * saveSyncedLinks
+     * applies the link sets given to Doctrine_Record::syncLinks(): inserts, updates
+     * and deletes refClass records of many-to-many relations, and sets or nulls
+     * the foreign key of one-to-many related records
+     *
+     * @throws Doctrine_Record_Exception    if a one-to-many related record does not exist
+     * @param Doctrine_Record $record
+     * @return void
+     */
+    public function saveSyncedLinks(Doctrine_Record $record)
+    {
+        foreach ($record->getPendingSyncs() as $alias => $sync) {
+            $rel = $record->getTable()->getRelation($alias);
+
+            if ($rel instanceof Doctrine_Relation_Association) {
+                $assocTable = $rel->getAssociationTable();
+                $local = $rel->getLocalRefFieldName();
+                $foreign = $rel->getForeignRefFieldName();
+                $id = $record->getIncremented();
+
+                $links = $assocTable->createQuery()
+                    ->where($local . ' = ?', array($id))
+                    ->execute();
+
+                foreach ($links as $link) {
+                    $linkedId = $link->get($foreign);
+                    if ( ! array_key_exists($linkedId, $sync)) {
+                        $link->delete($this->conn);
+                        continue;
+                    }
+                    $this->_saveSyncedLink($link, $sync[$linkedId]);
+                    unset($sync[$linkedId]);
+                }
+
+                foreach ($sync as $linkedId => $payload) {
+                    $link = $assocTable->create();
+                    $link->set($local, $id);
+                    $link->set($foreign, $linkedId);
+                    $this->_saveSyncedLink($link, $payload);
+                }
+            } else {
+                $table = $rel->getTable();
+                $foreign = $rel->getForeignFieldName();
+                $identifier = $table->getIdentifier();
+                $id = $record->get($rel->getLocalFieldName());
+
+                $linked = $table->createQuery()
+                    ->where($foreign . ' = ?', array($id))
+                    ->execute();
+
+                foreach ($linked as $related) {
+                    $relatedId = $related->get($identifier);
+                    if ( ! array_key_exists($relatedId, $sync)) {
+                        $related->set($foreign, null);
+                        $this->_saveSyncedLink($related, array());
+                        continue;
+                    }
+                    $this->_saveSyncedLink($related, $sync[$relatedId]);
+                    unset($sync[$relatedId]);
+                }
+
+                if ($sync) {
+                    $found = $table->createQuery()
+                        ->whereIn($identifier, array_keys($sync))
+                        ->execute();
+
+                    if (count($found) != count($sync)) {
+                        $missing = array_diff(array_keys($sync), $found->getPrimaryKeys());
+                        throw new Doctrine_Record_Exception("Can not sync links of '$alias': "
+                            . $table->getComponentName() . ' not found: ' . implode(', ', $missing));
+                    }
+
+                    foreach ($found as $related) {
+                        $related->set($foreign, $id);
+                        $this->_saveSyncedLink($related, $sync[$related->get($identifier)]);
+                    }
+                }
+            }
+
+            $record->clearRelated($alias);
+        }
+
+        $record->resetPendingSyncs();
+    }
+
+    /**
+     * Applies the payload to a link record and saves it when it has changed.
+     *
+     * @param Doctrine_Record $link
+     * @param array $payload    field => value
+     */
+    private function _saveSyncedLink(Doctrine_Record $link, array $payload)
+    {
+        foreach ($payload as $field => $value) {
+            $link->set($field, $value);
+        }
+
+        if ($link->isModified()) {
+            $link->save($this->conn);
         }
     }
 

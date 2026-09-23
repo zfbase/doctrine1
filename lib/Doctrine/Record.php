@@ -167,6 +167,13 @@ abstract class Doctrine_Record extends Doctrine_Record_Abstract implements Count
     protected $_pendingLinks = array();
 
     /**
+     * Array of pending link syncs in format alias => array(id => payload) to be executed after save
+     *
+     * @var array $_pendingSyncs
+     */
+    protected $_pendingSyncs = array();
+
+    /**
      * Array of custom accessors for cache
      *
      * @var array
@@ -1707,6 +1714,26 @@ abstract class Doctrine_Record extends Doctrine_Record_Abstract implements Count
     }
 
     /**
+     * returns link sets which need to be synchronized on save
+     *
+     * @return array $pendingSyncs  alias => array(id => payload)
+     */
+    public function getPendingSyncs()
+    {
+        return $this->_pendingSyncs;
+    }
+
+    /**
+     * resets pending link syncs
+     *
+     * @return void
+     */
+    public function resetPendingSyncs()
+    {
+        $this->_pendingSyncs = array();
+    }
+
+    /**
      * applies the changes made to this object into database
      * this method is smart enough to know if any changes are made
      * and whether to use INSERT or UPDATE statement
@@ -2462,6 +2489,15 @@ abstract class Doctrine_Record extends Doctrine_Record_Abstract implements Count
         }
 
         if (! $this->exists() || $now === false) {
+            if (isset($this->_pendingSyncs[$alias])) {
+                if (! $ids) {
+                    $this->_pendingSyncs[$alias] = array();
+                }
+                foreach ($ids as $id) {
+                    unset($this->_pendingSyncs[$alias][$id]);
+                }
+                return $this;
+            }
             if (! $ids) {
                 $ids = $allIds;
             }
@@ -2530,6 +2566,15 @@ abstract class Doctrine_Record extends Doctrine_Record_Abstract implements Count
         }
 
         if (! $this->exists() || $now === false) {
+            if (isset($this->_pendingSyncs[$alias])) {
+                foreach ($ids as $id) {
+                    if (! isset($this->_pendingSyncs[$alias][$id])) {
+                        $this->_pendingSyncs[$alias][$id] = array();
+                    }
+                }
+                return $this;
+            }
+
             $relTable = $this->getTable()->getRelation($alias)->getTable();
             $records = $relTable->createQuery()
                 ->whereIn($relTable->getIdentifier(), $ids)
@@ -2626,7 +2671,77 @@ abstract class Doctrine_Record extends Doctrine_Record_Abstract implements Count
     }
 
     /**
-     * Reset the modified array and store the old array in lastModified so it 
+     * replaces the whole set of links to the given related component on save
+     *
+     * $ids is either a list of related identifiers, or an array of
+     * identifier => payload, where payload holds field values to write to the link:
+     * the refClass record of a many-to-many relation, or the related record itself
+     * of a one-to-many relation. On save, links missing from $ids are removed
+     * (a one-to-many foreign key is set to null), new links are created and existing
+     * ones are updated with their payload. Nothing is sent to the database before save.
+     *
+     * @param string $alias     related component alias
+     * @param array $ids        list of identifiers, or identifier => payload
+     * @return Doctrine_Record  this object (fluent interface)
+     * @throws Doctrine_Record_Exception if the relation or $ids can not be synchronized
+     */
+    public function syncLinks($alias, array $ids)
+    {
+        if (! $this->getTable()->hasRelation($alias)) {
+            throw new Doctrine_Record_Exception("Unknown relation alias '$alias'");
+        }
+
+        $rel = $this->getTable()->getRelation($alias);
+
+        if ($rel instanceof Doctrine_Relation_Association) {
+            if (is_array($this->getTable()->getIdentifier())) {
+                throw new Doctrine_Record_Exception("Can not sync links of '$alias': composite identifier of " . $this->getTable()->getComponentName());
+            }
+            $target = $rel->getAssociationTable();
+            $reserved = array($rel->getLocalRefFieldName(), $rel->getForeignRefFieldName());
+        } else if ($rel instanceof Doctrine_Relation_ForeignKey && $rel->getType() == Doctrine_Relation::MANY) {
+            $target = $rel->getTable();
+            $reserved = array($rel->getForeignFieldName(), $target->getIdentifier());
+        } else {
+            throw new Doctrine_Record_Exception("Can not sync links of '$alias': only many-to-many and one-to-many relations are supported");
+        }
+
+        if (is_array($rel->getTable()->getIdentifier())) {
+            throw new Doctrine_Record_Exception("Can not sync links of '$alias': composite identifier of " . $rel->getTable()->getComponentName());
+        }
+
+        $sync = array();
+        $isList = false;
+        $isMap = false;
+        foreach ($ids as $key => $value) {
+            if (is_array($value)) {
+                $isMap = true;
+                foreach ($value as $field => $fieldValue) {
+                    if (! $target->hasField($field) || in_array($field, $reserved, true)) {
+                        throw new Doctrine_Record_Exception("Can not sync links of '$alias': '$field' is not a writable field of " . $target->getComponentName());
+                    }
+                }
+                $sync[$key] = $value;
+            } else if (is_scalar($value)) {
+                $isList = true;
+                $sync[$value] = array();
+            } else {
+                throw new Doctrine_Record_Exception("Can not sync links of '$alias': ids must be scalars or payload arrays");
+            }
+
+            if ($isList && $isMap) {
+                throw new Doctrine_Record_Exception("Can not sync links of '$alias': mix of an id list and id => payload");
+            }
+        }
+
+        unset($this->_pendingLinks[$alias], $this->_pendingUnlinks[$alias]);
+        $this->_pendingSyncs[$alias] = $sync;
+
+        return $this;
+    }
+
+    /**
+     * Reset the modified array and store the old array in lastModified so it
      * can be accessed by users after saving a record, since the modified array 
      * is reset after the object is saved.
      *
